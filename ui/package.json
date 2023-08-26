@@ -1,0 +1,32 @@
+{
+  "name": "vpn-dashboard",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^0.20.0",
+    "bulma": "^0.9.1",
+    "moment": "^2.29.1",
+    "pretty-bytes": "^5.4.1",
+    "svelma": "^0.4.0",
+    "svelte": "^3.29.0"
+  },
+  "devDependencies": {
+    "@snowpack/app-scripts-svelte": "^1.8.8",
+    "@snowpack/plugin-dotenv": "^2.0.3",
+    "@snowpack/plugin-run-script": "^2.1.5",
+    "@snowpack/plugin-svelte": "^2.2.0",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/svelte": "^3.0.0",
+    "jest": "^26.5.3",
+    "snowpack": "^2.14.0",
+    "svelte-check": "^1.0.56"
+  },
+  "engines": {
+    "node": ">=12.0.0",
+    "npm": ">=6.0.0"
+  }
+}
