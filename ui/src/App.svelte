@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {onMount} from 'svelte';
     import Button, {Icon, Label} from '@smui/button';
     import DataTable, {Body, Cell, Head, Row} from '@smui/data-table';
@@ -8,6 +8,9 @@
     import prettyBytes from 'pretty-bytes';
     import axios from 'axios';
     import {FlatToast, ToastContainer, toasts} from 'svelte-toasts';
+
+    import type {VpnConnInfo} from './lib/strongswan.js';
+    import type {PingResult} from './lib/ping';
 
     const refreshOptions = [
         {
@@ -33,10 +36,10 @@
 
     let selectedRefreshOption = 5;
     let refreshing = false;
-    let strongswanEntries = null;
+    let connections: VpnConnInfo[] | null = null;
     let refreshTimer;
     let pinging = false;
-    let pingResults = null;
+    let pingResults: { [key: string]: PingResult } | null = null;
 
     $: {
         if (refreshTimer) {
@@ -92,10 +95,10 @@
         refreshing = true;
         const strongswanPromise = axios.get('/service/strongswan/connections')
             .then(response => {
-                strongswanEntries = response.data.entries;
+                connections = response.data.entries;
             })
             .catch(e => {
-                strongswanEntries = null;
+                connections = null;
                 showError('Refresh', e);
             });
         Promise.all([strongswanPromise])
@@ -152,22 +155,8 @@
     }
 </script>
 
-<style>
-    .main-body {
-        margin: 1em;
-    }
-
-    .align-right {
-        text-align: right;
-    }
-
-    .table th.align-right {
-        text-align: right;
-    }
-</style>
-
 <div class="main-body">
-    <div class="level">
+    <div>
         <Button variant="raised" on:click={(e) => ping()} disabled={pinging}>
             <Label>Ping</Label>
         </Button>
@@ -200,110 +189,119 @@
                     </Row>
                 </Head>
                 <Body>
-                {#if strongswanEntries}
-                    {#each strongswanEntries as entry}
+                {#if connections}
+                    {#each connections as connInfo}
                         <Row>
                             <Cell>
-                                {entry['remote-id']}
+                                {connInfo['remote-id']}
                             </Cell>
                             <Cell>
-                                {entry['IkeSaName']}
+                                {connInfo.IkeSaName}
                             </Cell>
                             <Cell>
-                                {entry['remote-ts']}
+                                {connInfo['remote-ts']}
                             </Cell>
                             <Cell>
-                                {toDurationString(entry['established'])}
+                                {toDurationString(connInfo.established)}
                             </Cell>
                             <Cell>
-                                {toDurationString(entry['install-time'])}
+                                {toDurationString(connInfo['install-time'])}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(entry['bytes-in'])}
+                                {toPrettyBytes(connInfo['bytes-in'])}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(entry['packets-in'])}
+                                {toLocaleInt(connInfo['packets-in'])}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(entry['bytes-out'])}
+                                {toPrettyBytes(connInfo['bytes-out'])}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(entry['packets-out'])}
+                                {toLocaleInt(connInfo['packets-out'])}
                             </Cell>
                         </Row>
                     {/each}
                 {/if}
-
                 </Body>
             </DataTable>
         </Content>
     </Paper>
 
     {#if pingResults}
-        <h3 class="title is-3">Ping results</h3>
-        <table class="table is-fullwidth">
-            <thead>
-            <tr>
-                <th>IP address</th>
-                <th class="align-right">packets sent</th>
-                <th class="align-right">packets received</th>
-                <th class="align-right">packet loss (%)</th>
-                <th class="align-right">min (ms)</th>
-                <th class="align-right">avg (ms)</th>
-                <th class="align-right">max (ms)</th>
-                <th class="align-right">mdev (ms)</th>
-            </tr>
-            </thead>
-            <tbody>
-            {#if pingResults.results}
-                {#each Object.values(pingResults.results) as entry}
-                    <tr>
-                        <td>
-                            {entry.address}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toLocaleInt(entry.statistics.PacketsSent)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toLocaleInt(entry.statistics.PacketsRecv)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toLocaleInt(entry.statistics.PacketLoss)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toPingDurationString(entry.statistics.MinRtt)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toPingDurationString(entry.statistics.AvgRtt)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toPingDurationString(entry.statistics.MaxRtt)}
-                            {/if}
-                        </td>
-                        <td class="align-right">
-                            {#if entry.statistics}
-                                {toPingDurationString(entry.statistics.StdDevRtt)}
-                            {/if}
-                        </td>
-                    </tr>
-                {/each}
-            {/if}
-            </tbody>
-        </table>
+        <Paper variant="unelevated">
+            <Title>strongSwan connections</Title>
+            <Content>
+                <DataTable style="width: 100%;">
+                    <Head>
+                        <Row>
+                            <Cell>IP address</Cell>
+                            <Cell numeric>packets sent</Cell>
+                            <Cell numeric>packets received</Cell>
+                            <Cell numeric>packet loss (%)</Cell>
+                            <Cell numeric>min (ms)</Cell>
+                            <Cell numeric>avg (ms)</Cell>
+                            <Cell numeric>max (ms)</Cell>
+                            <Cell numeric>mdev (ms)</Cell>
+                        </Row>
+                    </Head>
+                    <Body>
+                    {#if pingResults.results}
+                        {#each Object.values(pingResults.results) as entry}
+                            <Row>
+                                <Cell>
+                                    {entry.address}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toLocaleInt(entry.statistics.PacketsSent)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toLocaleInt(entry.statistics.PacketsRecv)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toLocaleInt(entry.statistics.PacketLoss)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toPingDurationString(entry.statistics.MinRtt)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toPingDurationString(entry.statistics.AvgRtt)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toPingDurationString(entry.statistics.MaxRtt)}
+                                    {/if}
+                                </Cell>
+                                <Cell numeric>
+                                    {#if entry.statistics}
+                                        {toPingDurationString(entry.statistics.StdDevRtt)}
+                                    {/if}
+                                </Cell>
+                            </Row>
+                        {/each}
+                    {/if}
+                    </Body>
+                </DataTable>
+            </Content>
+        </Paper>
     {/if}
 </div>
 
 <ToastContainer placement="bottom-center" theme="dark" showProgress={true} let:data={data}>
     <FlatToast {data}/>
 </ToastContainer>
+
+<style>
+    .main-body {
+        margin: 1em;
+    }
+</style>

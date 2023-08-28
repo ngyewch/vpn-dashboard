@@ -1,7 +1,7 @@
 package network_util
 
 import (
-	"github.com/go-ping/ping"
+	"github.com/prometheus-community/pro-bing"
 	"time"
 )
 
@@ -11,10 +11,10 @@ type PingWorker struct {
 }
 
 type PingResult struct {
-	Address    string           `json:"address"`
-	Status     string           `json:"status"`
-	Error      string           `json:"error"`
-	Statistics *ping.Statistics `json:"statistics"`
+	Address    string              `json:"address"`
+	Status     string              `json:"status"`
+	Error      string              `json:"error"`
+	Statistics *probing.Statistics `json:"statistics"`
 }
 
 func NewPingWorker(addrs []string) PingWorker {
@@ -44,7 +44,7 @@ func (worker PingWorker) RunAndWait() {
 }
 
 func (worker PingWorker) Ping(result PingResult, c chan PingResult) {
-	pinger, err := ping.NewPinger(result.Address)
+	pinger, err := probing.NewPinger(result.Address)
 	if err != nil {
 		result.Status = "error"
 		result.Error = err.Error()
@@ -56,7 +56,6 @@ func (worker PingWorker) Ping(result PingResult, c chan PingResult) {
 	pinger.Debug = true
 	pinger.Count = 5
 	pinger.Timeout = 5 * time.Second
-	pinger.SetPrivileged(true)
 
 	err = pinger.Run()
 	if err != nil {
