@@ -1,4 +1,4 @@
 .task/
-node_modules/
-public/build/
 build/
+dist/
+node_modules/

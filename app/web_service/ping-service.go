@@ -1,9 +1,9 @@
 package web_service
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/labstack/echo/v4"
 	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/network_util"
 	"net/http"
 )
@@ -32,22 +32,20 @@ func NewPingService(addressProvider func() ([]string, error)) (*PingService, err
 	}, nil
 }
 
-func (service *PingService) Install(r *gin.Engine) {
-	r.GET("/service/ping", service.Ping)
-	r.GET("/service/pingResult", service.PingResult)
+func (service *PingService) Install(e *echo.Echo) {
+	e.GET("/service/ping", service.Ping)
+	e.GET("/service/pingResult", service.PingResult)
 }
 
-func (service *PingService) Ping(c *gin.Context) {
+func (service *PingService) Ping(c echo.Context) error {
 	addresses, err := service.addressProvider()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	pingWorker := network_util.NewPingWorker(addresses)
@@ -56,11 +54,11 @@ func (service *PingService) Ping(c *gin.Context) {
 
 	response := PingResponse{Id: id.String()}
 
-	c.JSON(200, response)
+	return c.JSON(http.StatusOK, response)
 }
 
-func (service *PingService) PingResult(c *gin.Context) {
-	id := c.Request.URL.Query().Get("id")
+func (service *PingService) PingResult(c echo.Context) error {
+	id := c.QueryParam("id")
 	cached, ok := service.cache.Get(id)
 	response := PingResultResponse{}
 	if ok {
@@ -73,5 +71,5 @@ func (service *PingService) PingResult(c *gin.Context) {
 		}
 		response.Results = worker.Results
 	}
-	c.JSON(200, response)
+	return c.JSON(http.StatusOK, response)
 }

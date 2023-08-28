@@ -8,9 +8,16 @@ tasks:
 
   build:
     desc: Build
-    deps: [ install-fileb0x ]
+    deps: [ generate-ui ]
     cmds:
       - goreleaser --snapshot --clean
+
+  generate-ui:
+    cmds:
+      - cd ../ui && eval `rtx env` && task build
+      - rm -rf resources/ui
+      - mkdir -p resources/ui
+      - cp -r ../ui/dist/* resources/ui
 
   dependencyUpdates:
     desc: Show dependency updates
@@ -32,9 +39,3 @@ tasks:
       - go install github.com/psampaz/go-mod-outdated@v0.9.0
     status:
       - rtx which go-mod-outdated
-
-  install-fileb0x:
-    cmds:
-      - go install github.com/UnnoTed/fileb0x@v1.1.4
-    status:
-      - rtx which fileb0x

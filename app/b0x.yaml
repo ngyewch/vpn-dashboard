@@ -1,7 +1,0 @@
-pkg: static
-dest: "./static/"
-
-custom:
-  - files:
-      - "../ui/build/*"
-    base: "../ui/build"

@@ -2,7 +2,7 @@ package strongswan
 
 import (
 	"github.com/bronze1man/goStrongswanVici"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
@@ -20,18 +20,16 @@ func NewService(client *Client) (*Service, error) {
 	}, nil
 }
 
-func (service *Service) Install(r *gin.Engine) {
-	r.GET("/service/strongswan/connections", service.connections)
+func (service *Service) Install(e *echo.Echo) {
+	e.GET("/service/strongswan/connections", service.connections)
 }
 
-func (service *Service) connections(c *gin.Context) {
+func (service *Service) connections(c echo.Context) error {
 	connections, err := service.client.GetVpnConnections()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	response := connectionsResponse{Entries: connections}
-
-	c.JSON(200, response)
+	return c.JSON(http.StatusOK, response)
 }

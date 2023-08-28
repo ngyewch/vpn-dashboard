@@ -1,22 +1,19 @@
-//go:generate fileb0x b0x.yaml
 package main
 
 import (
-	"github.com/dghubble/sessions"
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/prometheus"
+	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/resources"
 	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/strongswan"
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/wireguard"
+	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/web_service"
 	"golang.org/x/sync/errgroup"
-	"log"
+	"io/fs"
 	"net/http"
-	"os"
-	"time"
 )
 
 var (
-	sessionSecret = os.Getenv("SESSION_SECRET")
-	cookieStore   = sessions.NewCookieStore([]byte(sessionSecret), nil)
-	g             errgroup.Group
+	g errgroup.Group
 )
 
 func main() {
@@ -24,46 +21,43 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	wireguardClient, err := wireguard.NewClient()
-	if err != nil {
-		panic(err)
-	}
-	multiClient, err := NewMultiClient(strongswanClient, wireguardClient)
-	if err != nil {
-		panic(err)
-	}
 
-	serverMain := &http.Server{
-		Addr:         ":8080",
-		Handler:      routerMain(cookieStore, multiClient),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-
-	serverPrometheus := &http.Server{
-		Addr:         ":2112",
-		Handler:      prometheus.RouterPrometheus(multiClient.GetAddresses),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	listenPort := 8080
 
 	g.Go(func() error {
-		err := serverMain.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+		e := echo.New()
+		e.HideBanner = true
+		e.Use(middleware.Recover())
+		e.Use(middleware.Logger())
+
+		strongswanService, err := strongswan.NewService(strongswanClient)
+		if err != nil {
+			return err
 		}
-		return err
+		strongswanService.Install(e)
+
+		pingService, err := web_service.NewPingService(strongswanClient.GetAddresses)
+		if err != nil {
+			return err
+		}
+		pingService.Install(e)
+
+		rootFs, err := fs.Sub(resources.UiFS, "ui")
+		if err != nil {
+			return err
+		}
+		e.GET("/*", echo.WrapHandler(http.FileServer(http.FS(rootFs))))
+
+		err = e.Start(fmt.Sprintf(":%d", listenPort))
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 
-	g.Go(func() error {
-		err := serverPrometheus.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
-		}
-		return err
-	})
-
-	if err := g.Wait(); err != nil {
-		log.Fatal(err)
+	err = g.Wait()
+	if err != nil {
+		panic(err)
 	}
 }

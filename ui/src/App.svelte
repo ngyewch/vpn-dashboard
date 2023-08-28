@@ -1,9 +1,13 @@
 <script>
     import {onMount} from 'svelte';
-    import {Button, Select, Toast} from 'svelma';
+    import Button, {Icon, Label} from '@smui/button';
+    import DataTable, {Body, Cell, Head, Row} from '@smui/data-table';
+    import Paper, {Content, Title} from '@smui/paper';
+    import Select, {Option} from '@smui/select';
     import moment from 'moment';
     import prettyBytes from 'pretty-bytes';
     import axios from 'axios';
+    import {FlatToast, ToastContainer, toasts} from 'svelte-toasts';
 
     const refreshOptions = [
         {
@@ -30,7 +34,6 @@
     let selectedRefreshOption = 5;
     let refreshing = false;
     let strongswanEntries = null;
-    let wireguardEntries = null;
     let refreshTimer;
     let pinging = false;
     let pingResults = null;
@@ -78,11 +81,10 @@
     }
 
     function showError(title, e) {
-        Toast.create({
-            type: 'is-danger',
-            position: 'is-bottom',
-            message: title + ': '
-                + (e.response && e.response.data && e.response.data.error ? e.response.data.error : e),
+        toasts.add({
+            type: 'error',
+            title: title,
+            description: (e.response && e.response.data && e.response.data.error ? e.response.data.error : e),
         });
     }
 
@@ -96,15 +98,7 @@
                 strongswanEntries = null;
                 showError('Refresh', e);
             });
-        const wireguardPromise = axios.get('/service/wireguard/connections')
-            .then(response => {
-                wireguardEntries = response.data.entries;
-            })
-            .catch(e => {
-                wireguardEntries = null;
-                showError('Refresh', e);
-            });
-        Promise.all([strongswanPromise, wireguardPromise])
+        Promise.all([strongswanPromise])
             .then(responses => {
                 refreshing = false;
             })
@@ -174,115 +168,77 @@
 
 <div class="main-body">
     <div class="level">
-        <div class="level-left">
-        </div>
-        <div class="level-right">
-            <div class="level-item">
-                <Button type="is-primary" on:click={(e) => ping()} loading={pinging} disabled={pinging}>
-                    Ping
-                </Button>
-            </div>
-            <div class="level-item">
-                <Button type="is-primary" on:click={(e) => refresh()} loading={refreshing} disabled={refreshing}
-                        iconPack="fas" iconRight="sync">
-                    Refresh
-                </Button>
-            </div>
-            <div class="level-item">
-                <Select bind:selected={selectedRefreshOption}>
-                    {#each refreshOptions as refreshOption}
-                        <option value={refreshOption.value}>{refreshOption.caption}</option>
-                    {/each}
-                </Select>
-            </div>
-        </div>
+        <Button variant="raised" on:click={(e) => ping()} disabled={pinging}>
+            <Label>Ping</Label>
+        </Button>
+        <Button variant="raised" on:click={(e) => refresh()} disabled={refreshing}>
+            <Icon class="material-icons">refresh</Icon>
+            <Label>Refresh</Label>
+        </Button>
+        <Select bind:value={selectedRefreshOption}>
+            {#each refreshOptions as refreshOption}
+                <Option value={refreshOption.value}>{refreshOption.caption}</Option>
+            {/each}
+        </Select>
     </div>
-    <h3 class="title is-3">strongSwan connections</h3>
-    <table class="table is-fullwidth">
-        <thead>
-        <tr>
-            <th>Remote ID</th>
-            <th>IKE SA name</th>
-            <th>Remote TS</th>
-            <th>Established</th>
-            <th>Installed</th>
-            <th class="align-right">Bytes in</th>
-            <th class="align-right">Packets in</th>
-            <th class="align-right">Bytes out</th>
-            <th class="align-right">Packets out</th>
-        </tr>
-        </thead>
-        <tbody>
-        {#if strongswanEntries}
-            {#each strongswanEntries as entry}
-                <tr>
-                    <td>
-                        {entry['remote-id']}
-                    </td>
-                    <td>
-                        {entry['IkeSaName']}
-                    </td>
-                    <td>
-                        {entry['remote-ts']}
-                    </td>
-                    <td>
-                        {toDurationString(entry['established'])}
-                    </td>
-                    <td>
-                        {toDurationString(entry['install-time'])}
-                    </td>
-                    <td class="align-right">
-                        {toPrettyBytes(entry['bytes-in'])}
-                    </td>
-                    <td class="align-right">
-                        {toLocaleInt(entry['packets-in'])}
-                    </td>
-                    <td class="align-right">
-                        {toPrettyBytes(entry['bytes-out'])}
-                    </td>
-                    <td class="align-right">
-                        {toLocaleInt(entry['packets-out'])}
-                    </td>
-                </tr>
-            {/each}
-        {/if}
-        </tbody>
-    </table>
-    <h3 class="title is-3">Wireguard connections</h3>
-    <table class="table is-fullwidth">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Allowed IPs</th>
-            <th>Endpoint</th>
-            <th>Latest handshake</th>
-            <th>Transfer</th>
-        </tr>
-        </thead>
-        <tbody>
-        {#if wireguardEntries}
-            {#each wireguardEntries as entry}
-                <tr>
-                    <td>
-                        {entry['name']}
-                    </td>
-                    <td>
-                        {entry['allowedIps']}
-                    </td>
-                    <td>
-                        {entry['endpoint']}
-                    </td>
-                    <td>
-                        {entry['latestHandshake']}
-                    </td>
-                    <td>
-                        {entry['transfer']}
-                    </td>
-                </tr>
-            {/each}
-        {/if}
-        </tbody>
-    </table>
+
+    <Paper variant="unelevated">
+        <Title>strongSwan connections</Title>
+        <Content>
+            <DataTable style="width: 100%;">
+                <Head>
+                    <Row>
+                        <Cell>Remote ID</Cell>
+                        <Cell>IKE SA name</Cell>
+                        <Cell>Remote TS</Cell>
+                        <Cell>Established</Cell>
+                        <Cell>Installed</Cell>
+                        <Cell numeric>Bytes in</Cell>
+                        <Cell numeric>Packets in</Cell>
+                        <Cell numeric>Bytes out</Cell>
+                        <Cell numeric>Packets out</Cell>
+                    </Row>
+                </Head>
+                <Body>
+                {#if strongswanEntries}
+                    {#each strongswanEntries as entry}
+                        <Row>
+                            <Cell>
+                                {entry['remote-id']}
+                            </Cell>
+                            <Cell>
+                                {entry['IkeSaName']}
+                            </Cell>
+                            <Cell>
+                                {entry['remote-ts']}
+                            </Cell>
+                            <Cell>
+                                {toDurationString(entry['established'])}
+                            </Cell>
+                            <Cell>
+                                {toDurationString(entry['install-time'])}
+                            </Cell>
+                            <Cell numeric>
+                                {toPrettyBytes(entry['bytes-in'])}
+                            </Cell>
+                            <Cell numeric>
+                                {toLocaleInt(entry['packets-in'])}
+                            </Cell>
+                            <Cell numeric>
+                                {toPrettyBytes(entry['bytes-out'])}
+                            </Cell>
+                            <Cell numeric>
+                                {toLocaleInt(entry['packets-out'])}
+                            </Cell>
+                        </Row>
+                    {/each}
+                {/if}
+
+                </Body>
+            </DataTable>
+        </Content>
+    </Paper>
+
     {#if pingResults}
         <h3 class="title is-3">Ping results</h3>
         <table class="table is-fullwidth">
@@ -347,3 +303,7 @@
         </table>
     {/if}
 </div>
+
+<ToastContainer placement="bottom-center" theme="dark" showProgress={true} let:data={data}>
+    <FlatToast {data}/>
+</ToastContainer>
