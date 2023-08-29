@@ -6,10 +6,10 @@
     import Select, {Option} from '@smui/select';
     import moment from 'moment';
     import prettyBytes from 'pretty-bytes';
-    import axios from 'axios';
+    import ky from 'ky';
     import {FlatToast, ToastContainer, toasts} from 'svelte-toasts';
 
-    import type {VpnConnInfo} from './lib/strongswan.js';
+    import type {GetConnectionsResponse, VpnConnInfo} from './lib/strongswan.js';
 
     interface RefreshOption {
         value: number;
@@ -59,30 +59,21 @@
         refresh();
     });
 
-    function showError(title, e) {
-        toasts.add({
-            type: 'error',
-            title: title,
-            description: (e.response && e.response.data && e.response.data.error ? e.response.data.error : e),
-        });
-    }
-
     function refresh() {
         refreshing = true;
-        const strongswanPromise = axios.get('/service/strongswan/connections')
+        ky.get('/service/strongswan/connections').json<GetConnectionsResponse>()
             .then(response => {
-                connections = response.data.entries;
+                refreshing = false;
+                connections = response.entries;
             })
             .catch(e => {
+                refreshing = false;
                 connections = null;
-                showError('Refresh', e);
-            });
-        Promise.all([strongswanPromise])
-            .then(responses => {
-                refreshing = false;
-            })
-            .catch(e => {
-                refreshing = false;
+                toasts.add({
+                    type: 'error',
+                    title: 'Refresh',
+                    description: (e.response && e.response.data && e.response.data.error ? e.response.data.error : e),
+                });
             });
     }
 

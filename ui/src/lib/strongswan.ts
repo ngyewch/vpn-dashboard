@@ -1,3 +1,7 @@
+export interface GetConnectionsResponse {
+    entries: VpnConnInfo[];
+}
+
 export interface VpnConnInfo {
     // IkeSa
     uniqueid: string;
