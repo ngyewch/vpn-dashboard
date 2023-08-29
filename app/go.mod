@@ -4,10 +4,7 @@ go 1.21
 
 require (
 	github.com/bronze1man/goStrongswanVici v0.0.0-20221114103242-3f6dc524986c
-	github.com/google/uuid v1.3.1
-	github.com/hashicorp/golang-lru v1.0.2
 	github.com/labstack/echo/v4 v4.11.1
-	github.com/prometheus-community/pro-bing v0.3.0
 	golang.org/x/sync v0.3.0
 )
 

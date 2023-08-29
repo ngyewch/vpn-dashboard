@@ -10,9 +10,13 @@
     import {FlatToast, ToastContainer, toasts} from 'svelte-toasts';
 
     import type {VpnConnInfo} from './lib/strongswan.js';
-    import type {PingResult} from './lib/ping';
 
-    const refreshOptions = [
+    interface RefreshOption {
+        value: number;
+        caption: string;
+    }
+
+    const refreshOptions: RefreshOption[] = [
         {
             value: -1,
             caption: "manual",
@@ -38,8 +42,6 @@
     let refreshing = false;
     let connections: VpnConnInfo[] | null = null;
     let refreshTimer;
-    let pinging = false;
-    let pingResults: { [key: string]: PingResult } | null = null;
 
     $: {
         if (refreshTimer) {
@@ -56,32 +58,6 @@
     onMount(() => {
         refresh();
     });
-
-    function ping() {
-        pinging = true;
-        pingResults = null;
-        axios.get('/service/ping')
-            .then(response => {
-                const pingId = response.data.id;
-                setTimeout(() => {
-                    axios.get('/service/pingResult?id=' + pingId)
-                        .then(response2 => {
-                            pinging = false;
-                            pingResults = response2.data;
-                        })
-                        .catch(e => {
-                            pinging = false;
-                            pingResults = null;
-                            showError('Ping', e);
-                        });
-                }, 5000);
-            })
-            .catch(e => {
-                pinging = false;
-                pingResults = null;
-                showError('Ping', e);
-            });
-    }
 
     function showError(title, e) {
         toasts.add({
@@ -121,17 +97,6 @@
         return moment.duration(n, 'seconds').humanize();
     }
 
-    function toPingDurationString(v) {
-        if (isNaN(v)) {
-            return null;
-        }
-        const n = parseInt(v);
-        if (isNaN(n)) {
-            return null;
-        }
-        return (n / 1000000).toLocaleString();
-    }
-
     function toLocaleInt(v) {
         if (isNaN(v)) {
             return null;
@@ -157,9 +122,6 @@
 
 <div class="main-body">
     <div>
-        <Button variant="raised" on:click={(e) => ping()} disabled={pinging}>
-            <Label>Ping</Label>
-        </Button>
         <Button variant="raised" on:click={(e) => refresh()} disabled={refreshing}>
             <Icon class="material-icons">refresh</Icon>
             <Label>Refresh</Label>
@@ -226,74 +188,6 @@
             </DataTable>
         </Content>
     </Paper>
-
-    {#if pingResults}
-        <Paper variant="unelevated">
-            <Title>strongSwan connections</Title>
-            <Content>
-                <DataTable style="width: 100%;">
-                    <Head>
-                        <Row>
-                            <Cell>IP address</Cell>
-                            <Cell numeric>packets sent</Cell>
-                            <Cell numeric>packets received</Cell>
-                            <Cell numeric>packet loss (%)</Cell>
-                            <Cell numeric>min (ms)</Cell>
-                            <Cell numeric>avg (ms)</Cell>
-                            <Cell numeric>max (ms)</Cell>
-                            <Cell numeric>mdev (ms)</Cell>
-                        </Row>
-                    </Head>
-                    <Body>
-                    {#if pingResults.results}
-                        {#each Object.values(pingResults.results) as entry}
-                            <Row>
-                                <Cell>
-                                    {entry.address}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toLocaleInt(entry.statistics.PacketsSent)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toLocaleInt(entry.statistics.PacketsRecv)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toLocaleInt(entry.statistics.PacketLoss)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toPingDurationString(entry.statistics.MinRtt)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toPingDurationString(entry.statistics.AvgRtt)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toPingDurationString(entry.statistics.MaxRtt)}
-                                    {/if}
-                                </Cell>
-                                <Cell numeric>
-                                    {#if entry.statistics}
-                                        {toPingDurationString(entry.statistics.StdDevRtt)}
-                                    {/if}
-                                </Cell>
-                            </Row>
-                        {/each}
-                    {/if}
-                    </Body>
-                </DataTable>
-            </Content>
-        </Paper>
-    {/if}
 </div>
 
 <ToastContainer placement="bottom-center" theme="dark" showProgress={true} let:data={data}>

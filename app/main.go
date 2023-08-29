@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/resources"
 	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/strongswan"
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/web_service"
 	"golang.org/x/sync/errgroup"
 	"io/fs"
 	"net/http"
@@ -35,12 +34,6 @@ func main() {
 			return err
 		}
 		strongswanService.Install(e)
-
-		pingService, err := web_service.NewPingService(strongswanClient.GetAddresses)
-		if err != nil {
-			return err
-		}
-		pingService.Install(e)
 
 		rootFs, err := fs.Sub(resources.UiFS, "ui")
 		if err != nil {
