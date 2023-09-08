@@ -18,8 +18,8 @@ dependencies:
     specifier: ^6.1.4
     version: 6.2.0(svelte@3.59.2)(typescript@5.2.2)
   ky:
-    specifier: ^0.33.3
-    version: 0.33.3
+    specifier: ^1.0.1
+    version: 1.0.1
   moment:
     specifier: ^2.29.4
     version: 2.29.4
@@ -53,8 +53,8 @@ devDependencies:
     specifier: ^1.66.1
     version: 1.66.1
   svelte-check:
-    specifier: ^3.5.0
-    version: 3.5.0(sass@1.66.1)(svelte@3.59.2)
+    specifier: ^3.5.1
+    version: 3.5.1(sass@1.66.1)(svelte@3.59.2)
   svelte-preprocess:
     specifier: ^5.0.4
     version: 5.0.4(sass@1.66.1)(svelte@3.59.2)(typescript@5.2.2)
@@ -2108,9 +2108,9 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /ky@0.33.3:
-    resolution: {integrity: sha512-CasD9OCEQSFIam2U8efFK81Yeg8vNMTBUqtMOHlrcWQHqUX3HeCl9Dr31u4toV7emlH8Mymk5+9p0lL6mKb/Xw==}
-    engines: {node: '>=14.16'}
+  /ky@1.0.1:
+    resolution: {integrity: sha512-UvcwpQO0LOuZwG0Ti3VDo6w57KYt+r4bWEYlNaMt82hgyFtse86QtOGum1RzsZni31FndXQl6NvtDArfunt2JQ==}
+    engines: {node: '>=18'}
     dev: false
 
   /load-json-file@4.0.0:
@@ -2599,8 +2599,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /svelte-check@3.5.0(sass@1.66.1)(svelte@3.59.2):
-    resolution: {integrity: sha512-KHujbn4k17xKYLmtCwv0sKKM7uiHTYcQvXnvrCcNU6a7hcszh99zFTIoiu/Sp/ewAw5aJmillJ1Cs8gKLmcX4A==}
+  /svelte-check@3.5.1(sass@1.66.1)(svelte@3.59.2):
+    resolution: {integrity: sha512-+Zb4iHxAhdUtcUg/WJPRjlS1RJalIsWAe9Mz6G1zyznSs7dDkT7VUBdXc3q7Iwg49O/VrZgyJRvOJkjuBfKjFA==}
     hasBin: true
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0-next.0 || ^4.0.0
