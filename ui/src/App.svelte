@@ -41,12 +41,12 @@
     let selectedRefreshOption = 5;
     let refreshing = false;
     let connections: VpnConnInfo[] | null = null;
-    let refreshTimer;
+    let refreshTimer: number | undefined;
 
     $: {
         if (refreshTimer) {
             clearInterval(refreshTimer);
-            refreshTimer = null;
+            refreshTimer = undefined;
         }
         if (selectedRefreshOption > 0) {
             refreshTimer = setInterval(() => {
@@ -77,35 +77,35 @@
             });
     }
 
-    function toDurationString(v) {
+    function toDurationString(v: any, defaultValue: string): string {
         if (isNaN(v)) {
-            return null;
+            return defaultValue;
         }
         const n = parseInt(v);
         if (isNaN(n)) {
-            return null;
+            return defaultValue;
         }
         return moment.duration(n, 'seconds').humanize();
     }
 
-    function toLocaleInt(v) {
+    function toLocaleInt(v: any, defaultValue: string): string {
         if (isNaN(v)) {
-            return null;
+            return defaultValue;
         }
         const n = parseInt(v);
         if (isNaN(n)) {
-            return null;
+            return defaultValue;
         }
         return n.toLocaleString();
     }
 
-    function toPrettyBytes(v) {
+    function toPrettyBytes(v: any, defaultValue: string): string {
         if (isNaN(v)) {
-            return null;
+            return defaultValue;
         }
         const n = parseInt(v);
         if (isNaN(n)) {
-            return null;
+            return defaultValue;
         }
         return prettyBytes(n);
     }
@@ -155,22 +155,22 @@
                                 {connInfo['remote-ts']}
                             </Cell>
                             <Cell>
-                                {toDurationString(connInfo.established)}
+                                {toDurationString(connInfo.established, '')}
                             </Cell>
                             <Cell>
-                                {toDurationString(connInfo['install-time'])}
+                                {toDurationString(connInfo['install-time'], '')}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(connInfo['bytes-in'])}
+                                {toPrettyBytes(connInfo['bytes-in'], '')}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(connInfo['packets-in'])}
+                                {toLocaleInt(connInfo['packets-in'], '')}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(connInfo['bytes-out'])}
+                                {toPrettyBytes(connInfo['bytes-out'], '')}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(connInfo['packets-out'])}
+                                {toLocaleInt(connInfo['packets-out'], '')}
                             </Cell>
                         </Row>
                     {/each}
