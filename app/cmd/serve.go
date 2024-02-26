@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/resources"
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/strongswan"
+	"github.com/ngyewch/vpn-dashboard/resources"
+	"github.com/ngyewch/vpn-dashboard/strongswan"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"io/fs"

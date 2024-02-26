@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/org-arl/cloud-infrastructure/software/vpn-dashboard/cmd"
+	"github.com/ngyewch/vpn-dashboard/cmd"
 )
 
 func main() {
