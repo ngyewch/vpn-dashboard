@@ -18,21 +18,21 @@
     "@tsconfig/svelte": "^5.0.2",
     "cross-env": "^7.0.3",
     "npm-run-all": "^4.1.5",
-    "sass": "^1.70.0",
-    "svelte-check": "^3.6.3",
+    "sass": "^1.71.1",
+    "svelte-check": "^3.6.4",
     "svelte-preprocess": "^5.1.3",
     "typescript": "^5.3.3",
-    "vite": "^5.0.12"
+    "vite": "^5.1.4"
   },
   "dependencies": {
     "@smui/button": "^7.0.0-beta.16",
     "@smui/data-table": "^7.0.0-beta.16",
     "@smui/paper": "^7.0.0-beta.16",
     "@smui/select": "^7.0.0-beta.16",
-    "ky": "^1.2.0",
+    "ky": "^1.2.1",
     "moment": "^2.30.1",
     "pretty-bytes": "^6.1.1",
-    "svelte": "^4.2.9",
+    "svelte": "^4.2.12",
     "svelte-material-ui": "^7.0.0-beta.16",
     "svelte-toasts": "^1.1.2"
   }
