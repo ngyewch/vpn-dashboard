@@ -5,6 +5,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ngyewch/vpn-dashboard/resources"
 	"github.com/ngyewch/vpn-dashboard/strongswan"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"io/fs"
@@ -44,6 +46,11 @@ func serve(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		strongswanService.Install(e)
+
+		reg := prometheus.NewPedanticRegistry()
+		collector := strongswan.NewCollector(strongswanClient)
+		reg.MustRegister(collector)
+		e.GET("/metrics", echo.WrapHandler(promhttp.HandlerFor(reg, promhttp.HandlerOpts{})))
 
 		rootFs, err := fs.Sub(resources.UiFS, "ui")
 		if err != nil {
