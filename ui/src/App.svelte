@@ -16,6 +16,17 @@
         caption: string;
     }
 
+    interface Entry {
+        remoteId: string;
+        ikeSaName: string;
+        remoteTs: string[];
+        established: number;
+        bytesIn: number;
+        packetsIn: number;
+        bytesOut: number;
+        packetsOut: number;
+    }
+
     const refreshOptions: RefreshOption[] = [
         {
             value: -1,
@@ -41,6 +52,7 @@
     let selectedRefreshOption = 5;
     let refreshing = false;
     let connections: VpnConnInfo[] | null = null;
+    let entries: Entry[] | null = null;
     let refreshTimer: number | undefined;
 
     $: {
@@ -59,16 +71,58 @@
         refresh();
     });
 
+    function doParseInt(s: string | null | undefined): number {
+        if ((s === null) || (s === undefined)) {
+            return 0;
+        }
+        const v = parseInt(s);
+        if (isNaN(v)) {
+            return 0;
+        }
+        return v;
+    }
+
     function refresh() {
         refreshing = true;
         ky.get('/service/strongswan/connections').json<GetConnectionsResponse>()
             .then(response => {
                 refreshing = false;
                 connections = response.entries;
+                entries = connections.map(connection => {
+                    let bytesIn = 0;
+                    let packetsIn = 0;
+                    let bytesOut = 0;
+                    let packetsOut = 0;
+                    if (connection["child-sas"]) {
+                        for (const [key, childSas] of Object.entries(connection["child-sas"])) {
+                            bytesIn += doParseInt(childSas["bytes-in"]);
+                            packetsIn += doParseInt(childSas["packets-in"]);
+                            bytesOut += doParseInt(childSas["bytes-out"]);
+                            packetsOut += doParseInt(childSas["packets-out"]);
+                        }
+                    } else {
+                        bytesIn = doParseInt(connection["bytes-in"]);
+                        packetsIn = doParseInt(connection["packets-in"]);
+                        bytesOut = doParseInt(connection["bytes-out"]);
+                        packetsOut = doParseInt(connection["packets-out"]);
+                    }
+                    const entry: Entry = {
+                        remoteId: connection['remote-id'],
+                        ikeSaName: connection.IkeSaName,
+                        remoteTs: connection['remote-ts'],
+                        established: doParseInt(connection.established),
+                        bytesIn: bytesIn,
+                        packetsIn: packetsIn,
+                        bytesOut: bytesOut,
+                        packetsOut: packetsOut,
+                    };
+                    return entry;
+                });
             })
             .catch(e => {
                 refreshing = false;
                 connections = null;
+                entries = null;
                 toasts.add({
                     type: 'error',
                     title: 'Refresh',
@@ -134,7 +188,6 @@
                         <Cell>IKE SA name</Cell>
                         <Cell>Remote TS</Cell>
                         <Cell>Established</Cell>
-                        <Cell>Installed</Cell>
                         <Cell numeric>Bytes in</Cell>
                         <Cell numeric>Packets in</Cell>
                         <Cell numeric>Bytes out</Cell>
@@ -142,35 +195,32 @@
                     </Row>
                 </Head>
                 <Body>
-                {#if connections}
-                    {#each connections as connInfo}
+                {#if entries}
+                    {#each entries as entry}
                         <Row>
                             <Cell>
-                                {connInfo['remote-id']}
+                                {entry.remoteId}
                             </Cell>
                             <Cell>
-                                {connInfo.IkeSaName}
+                                {entry.ikeSaName}
                             </Cell>
                             <Cell>
-                                {connInfo['remote-ts']}
+                                {entry.remoteTs}
                             </Cell>
                             <Cell>
-                                {toDurationString(connInfo.established, '')}
-                            </Cell>
-                            <Cell>
-                                {toDurationString(connInfo['install-time'], '')}
+                                {toDurationString(entry.established, '')}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(connInfo['bytes-in'], '')}
+                                {toPrettyBytes(entry.bytesIn, '')}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(connInfo['packets-in'], '')}
+                                {toLocaleInt(entry.packetsIn, '')}
                             </Cell>
                             <Cell numeric>
-                                {toPrettyBytes(connInfo['bytes-out'], '')}
+                                {toPrettyBytes(entry.bytesIn, '')}
                             </Cell>
                             <Cell numeric>
-                                {toLocaleInt(connInfo['packets-out'], '')}
+                                {toLocaleInt(entry.packetsOut, '')}
                             </Cell>
                         </Row>
                     {/each}
