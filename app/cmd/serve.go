@@ -32,7 +32,7 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	strongswanClient, err := strongswan.NewClient()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	g.Go(func() error {
@@ -68,7 +68,7 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	err = g.Wait()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
