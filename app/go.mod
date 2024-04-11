@@ -9,7 +9,7 @@ require (
 	github.com/ngyewch/go-versioninfo v1.5.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/sync v0.7.0
 )
 
 require (
