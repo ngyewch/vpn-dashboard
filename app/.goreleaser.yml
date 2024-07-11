@@ -1,3 +1,4 @@
+version: 2
 project_name: vpn-dashboard
 before:
   hooks:
@@ -20,6 +21,6 @@ builds:
 checksum:
   name_template: 'checksums.txt'
 changelog:
-  skip: true
+  disable: true
 release:
   disable: false
