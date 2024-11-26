@@ -7,9 +7,9 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/ngyewch/go-clibase v1.5.0
 	github.com/ngyewch/go-versioninfo v1.5.1
-	github.com/prometheus/client_golang v1.20.4
+	github.com/prometheus/client_golang v1.20.5
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.9.0
 )
 
 require (
