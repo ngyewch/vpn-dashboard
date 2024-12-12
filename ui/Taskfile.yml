@@ -10,33 +10,12 @@ tasks:
     cmds:
       - pnpm install
       - pnpm prune
-    sources:
-      - package.json
-      - pnpm-lock.yaml
-    generates:
-      - node_modules/*
 
   build:
     desc: Build
     deps: [ install ]
     cmds:
       - pnpm build
-    sources:
-      - public/*
-      - public/**/*
-      - src/*
-      - src/**/*
-      - .env
-      - index.html
-      - package.json
-      - svelte.config.js
-      - pnpm-lock.yaml
-      - tsconfig.json
-      - tsconfig.node.json
-      - vite.config.ts
-    generates:
-      - dist/*
-      - dist/**/*
 
   run:
     deps: [ install ]
