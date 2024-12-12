@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"github.com/labstack/echo/v4"
@@ -7,26 +7,14 @@ import (
 	"github.com/ngyewch/vpn-dashboard/strongswan"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"io/fs"
 	"net/http"
 )
 
-var (
-	serveCmd = &cobra.Command{
-		Use:   "serve",
-		Short: "Serve",
-		Args:  cobra.ExactArgs(0),
-		RunE:  serve,
-	}
-)
-
-func serve(cmd *cobra.Command, args []string) error {
-	listenAddr, err := cmd.Flags().GetString("listen-addr")
-	if err != nil {
-		return err
-	}
+func doServe(cCtx *cli.Context) error {
+	listenAddr := flagListenAddr.Get(cCtx)
 
 	var g errgroup.Group
 
@@ -72,10 +60,4 @@ func serve(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(serveCmd)
-
-	serveCmd.Flags().String("listen-addr", ":8080", "listen addr")
 }
