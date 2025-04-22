@@ -2,8 +2,6 @@ module github.com/ngyewch/vpn-dashboard
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	github.com/bronze1man/goStrongswanVici v0.0.0-20231128135937-211cef3b0b20
 	github.com/labstack/echo/v4 v4.13.3
