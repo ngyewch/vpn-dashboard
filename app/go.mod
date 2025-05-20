@@ -8,7 +8,7 @@ require (
 	github.com/ngyewch/go-clibase v1.6.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/urfave/cli/v2 v2.27.6
-	golang.org/x/sync v0.13.0
+	golang.org/x/sync v0.14.0
 )
 
 require (
