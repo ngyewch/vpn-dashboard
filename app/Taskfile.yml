@@ -8,13 +8,15 @@ tasks:
 
   build:
     desc: Build
-    deps: [ generate-ui ]
     cmds:
       - goreleaser --snapshot --clean
 
+  generate:
+    deps: [ generate-ui ]
+
   generate-ui:
     cmds:
-      - cd ../ui && eval `mise env` && task build
+      - cd ../ui && mise exec -- task build
       - rm -rf resources/ui
       - mkdir -p resources/ui
       - cp -r ../ui/dist/* resources/ui
