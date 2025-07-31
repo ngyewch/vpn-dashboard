@@ -1,9 +1,11 @@
+import {mount} from 'svelte';
 import App from './App.svelte';
 
-import 'svelte-material-ui/bare.css';
+import '@picocss/pico/css/pico.css';
+import './global.css';
 
-const app = new App({
-	target: document.body,
+const app = mount(App, {
+	target: document.getElementById('app')!,
 });
 
 export default app;

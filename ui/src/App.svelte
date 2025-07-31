@@ -1,12 +1,8 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import Button, {Icon, Label} from '@smui/button';
-    import DataTable, {Body, Cell, Head, Row} from '@smui/data-table';
-    import Paper, {Content, Title} from '@smui/paper';
-    import Select, {Option} from '@smui/select';
-    import moment from 'moment';
     import prettyBytes from 'pretty-bytes';
     import ky from 'ky';
+    import humanizeDuration from 'humanize-duration';
     import {FlatToast, ToastContainer, toasts} from 'svelte-toasts';
 
     import type {GetConnectionsResponse, VpnConnInfo} from './lib/strongswan.js';
@@ -27,6 +23,21 @@
         packetsOut: number;
     }
 
+    const shortEnglishHumanizer = humanizeDuration.humanizer({
+        language: "shortEn",
+        languages: {
+            shortEn: {
+                y: () => "y",
+                mo: () => "mo",
+                w: () => "w",
+                d: () => "d",
+                h: () => "h",
+                m: () => "m",
+                s: () => "s",
+                ms: () => "ms",
+            },
+        },
+    });
     const refreshOptions: RefreshOption[] = [
         {
             value: -1,
@@ -139,7 +150,7 @@
         if (isNaN(n)) {
             return defaultValue;
         }
-        return moment.duration(n, 'seconds').humanize();
+        return shortEnglishHumanizer(v * 1000);
     }
 
     function toLocaleInt(v: any, defaultValue: string): string {
@@ -166,77 +177,87 @@
 </script>
 
 <div class="main-body">
-    <div>
-        <Button variant="raised" on:click={(e) => refresh()} disabled={refreshing}>
-            <Icon class="material-icons">refresh</Icon>
-            <Label>Refresh</Label>
-        </Button>
-        <Select bind:value={selectedRefreshOption}>
+    <div class="toolbar">
+        <button onclick={(e) => refresh()} disabled={refreshing}>Refresh</button>
+        <select bind:value={selectedRefreshOption}>
             {#each refreshOptions as refreshOption}
-                <Option value={refreshOption.value}>{refreshOption.caption}</Option>
+                <option value={refreshOption.value}>{refreshOption.caption}</option>
             {/each}
-        </Select>
+        </select>
     </div>
 
-    <Paper variant="unelevated">
-        <Title>strongSwan connections</Title>
-        <Content>
-            <DataTable style="width: 100%;">
-                <Head>
-                    <Row>
-                        <Cell>Remote ID</Cell>
-                        <Cell>IKE SA name</Cell>
-                        <Cell>Remote TS</Cell>
-                        <Cell>Established</Cell>
-                        <Cell numeric>Bytes in</Cell>
-                        <Cell numeric>Packets in</Cell>
-                        <Cell numeric>Bytes out</Cell>
-                        <Cell numeric>Packets out</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                {#if entries}
-                    {#each entries as entry}
-                        <Row>
-                            <Cell>
-                                {entry.remoteId}
-                            </Cell>
-                            <Cell>
-                                {entry.ikeSaName}
-                            </Cell>
-                            <Cell>
-                                {entry.remoteTs}
-                            </Cell>
-                            <Cell>
-                                {toDurationString(entry.established, '')}
-                            </Cell>
-                            <Cell numeric>
-                                {toPrettyBytes(entry.bytesIn, '')}
-                            </Cell>
-                            <Cell numeric>
-                                {toLocaleInt(entry.packetsIn, '')}
-                            </Cell>
-                            <Cell numeric>
-                                {toPrettyBytes(entry.bytesIn, '')}
-                            </Cell>
-                            <Cell numeric>
-                                {toLocaleInt(entry.packetsOut, '')}
-                            </Cell>
-                        </Row>
-                    {/each}
-                {/if}
-                </Body>
-            </DataTable>
-        </Content>
-    </Paper>
+    <h2>strongSwan connections</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Remote ID</th>
+            <th>IKE SA name</th>
+            <th>Remote TS</th>
+            <th>Established</th>
+            <th class="numeric">Bytes in</th>
+            <th class="numeric">Packets in</th>
+            <th class="numeric">Bytes out</th>
+            <th class="numeric">Packets out</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#if entries}
+            {#each entries as entry}
+                <tr>
+                    <td>
+                        {entry.remoteId}
+                    </td>
+                    <td>
+                        {entry.ikeSaName}
+                    </td>
+                    <td>
+                        {entry.remoteTs}
+                    </td>
+                    <td>
+                        {toDurationString(entry.established, '')}
+                    </td>
+                    <td class="numeric">
+                        {toPrettyBytes(entry.bytesIn, '')}
+                    </td>
+                    <td class="numeric">
+                        {toLocaleInt(entry.packetsIn, '')}
+                    </td>
+                    <td class="numeric">
+                        {toPrettyBytes(entry.bytesIn, '')}
+                    </td>
+                    <td class="numeric">
+                        {toLocaleInt(entry.packetsOut, '')}
+                    </td>
+                </tr>
+            {/each}
+        {/if}
+        </tbody>
+    </table>
 </div>
 
-<ToastContainer placement="bottom-center" theme="dark" showProgress={true} let:data={data}>
+<ToastContainer placement="bottom-center" theme="light" showProgress={true} let:data={data}>
     <FlatToast {data}/>
 </ToastContainer>
 
 <style>
     .main-body {
         margin: 1em;
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 0.5em;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2em;
+    }
+
+    .toolbar select {
+        margin: 0;
+    }
+
+
+    td.numeric {
+        text-align: right;
     }
 </style>
