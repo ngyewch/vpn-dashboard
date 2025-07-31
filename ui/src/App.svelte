@@ -25,6 +25,8 @@
 
     const shortEnglishHumanizer = humanizeDuration.humanizer({
         language: "shortEn",
+        spacer: "",
+        delimiter: " ",
         languages: {
             shortEn: {
                 y: () => "y",
