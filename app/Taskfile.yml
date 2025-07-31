@@ -9,7 +9,7 @@ tasks:
   build:
     desc: Build
     cmds:
-      - goreleaser release --auto-snapshot --clean
+      - goreleaser --snapshot --clean
 
   generate:
     deps: [ generate-ui ]
