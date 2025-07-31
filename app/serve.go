@@ -1,20 +1,21 @@
 package main
 
 import (
+	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ngyewch/vpn-dashboard/resources"
 	"github.com/ngyewch/vpn-dashboard/strongswan"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 	"io/fs"
 	"net/http"
 )
 
-func doServe(cCtx *cli.Context) error {
-	listenAddr := flagListenAddr.Get(cCtx)
+func doServe(ctx context.Context, cmd *cli.Command) error {
+	listenAddr := cmd.String(flagListenAddr.Name)
 
 	var g errgroup.Group
 
