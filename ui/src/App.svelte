@@ -256,7 +256,7 @@
         margin: 0;
     }
 
-
+    th.numeric,
     td.numeric {
         text-align: right;
     }
