@@ -19,8 +19,9 @@ tasks:
       - mkdir -p resources/ui
       - cp -r ../ui/dist/* resources/ui
 
-  dependencyUpdates:
+  outdated:
     desc: Show dependency updates
+    aliases: [ dependencyUpdates ]
     cmds:
       - go mod download
       - go mod tidy

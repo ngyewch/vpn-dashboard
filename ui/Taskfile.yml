@@ -22,7 +22,10 @@ tasks:
     cmds:
       - pnpm run dev
 
-  dependencyUpdates:
+  outdated:
+    desc: Outdated
+    aliases: [ dependencyUpdates ]
+    deps: [ install ]
     cmds:
       - cmd: pnpm outdated
         ignore_error: true
