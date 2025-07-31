@@ -16,8 +16,25 @@ builds:
     ldflags:
       - -s -w
       - -X main.version={{ if index .Env "VERSION" }}{{ .Env.VERSION }}{{ else }}{{ .Version }}{{ end }}
-      - -X main.commit={{ if index .Env "COMMIT" }}{{ .Env.COMMIT }}{{ else }}{{ .Commit }}{{ end }}
-      - -X main.commitTimestamp={{ if index .Env "COMMIT_TIMESTAMP" }}{{ .Env.COMMIT_TIMESTAMP }}{{ else }}{{ .CommitTimestamp }}{{ end }}
+archives:
+  - formats:
+      - zip
+nfpms:
+  - file_name_template: '{{ .PackageName }}_{{ if index .Env "VERSION" }}{{ .Env.VERSION }}{{ else }}{{ .Version }}{{ end }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    maintainer: Nick Ng <ngyewch@gmail.com>
+    description: VPN Dashboard
+    formats:
+      - deb
+      - rpm
+    contents:
+      - src: nfpm/contents
+        dst: /
+        type: tree
+    scripts:
+      preinstall: nfpm/scripts/preinstall.sh
+      postinstall: nfpm/scripts/postinstall.sh
+      preremove: nfpm/scripts/preremove.sh
+      postremove: nfpm/scripts/postremove.sh
 checksum:
   name_template: 'checksums.txt'
 changelog:

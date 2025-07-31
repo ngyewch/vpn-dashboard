@@ -1,0 +1,13 @@
+[Unit]
+Description=VPN Dashboard service
+After=network.target network-online.target nss-lookup.target basic.target
+Wants=network-online.target nss-lookup.target
+
+[Service]
+EnvironmentFile=-/etc/vpn-dashboard.env
+Restart=on-failure
+RestartSec=30
+ExecStart=/usr/bin/vpn-dashboard serve
+
+[Install]
+WantedBy=multi-user.target
