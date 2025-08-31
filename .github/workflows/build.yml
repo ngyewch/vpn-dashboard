@@ -21,14 +21,14 @@ jobs:
           go-version: "~1.24"
 
       - name: mise setup
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           working_directory: ./app
           experimental: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: mise setup
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
         with:
           working_directory: ./ui
           experimental: true
