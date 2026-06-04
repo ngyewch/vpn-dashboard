@@ -7,30 +7,31 @@
     "doDev": "vite",
     "doBuild": "cross-env NODE_ENV=production vite build",
     "doPreview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "watch:check": "svelte-check --tsconfig ./tsconfig.json --watch",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "watch:check": "svelte-check --tsconfig ./tsconfig.app.json --watch",
     "dev": "run-p watch:* doDev",
     "build": "run-s check doBuild",
     "preview": "run-s build doPreview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "6.2.4",
-    "@tsconfig/svelte": "5.0.6",
+    "@sveltejs/vite-plugin-svelte": "7.1.2",
+    "@tsconfig/svelte": "5.0.8",
     "@types/humanize-duration": "3.27.4",
+    "@types/node": "24.12.4",
     "cross-env": "10.1.0",
-    "npm-run-all2": "8.0.4",
-    "sass": "1.97.3",
-    "svelte-check": "4.3.5",
-    "svelte-preprocess": "6.0.3",
-    "typescript": "5.9.3",
-    "vite": "7.3.1"
+    "npm-run-all2": "9.0.1",
+    "sass": "1.100.0",
+    "svelte-check": "4.5.0",
+    "svelte-preprocess": "6.0.5",
+    "typescript": "6.0.3",
+    "vite": "8.0.16"
   },
   "dependencies": {
     "@picocss/pico": "2.1.1",
     "humanize-duration": "3.33.2",
-    "ky": "1.14.2",
+    "ky": "2.0.2",
     "pretty-bytes": "7.1.0",
-    "svelte": "5.48.0",
+    "svelte": "5.56.1",
     "svelte-toasts": "1.1.2"
   }
 }
