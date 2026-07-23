@@ -25,6 +25,9 @@ tasks:
     desc: Show dependency updates
     aliases: [ dependencyUpdates ]
     cmds:
-      - go mod download
       - go mod tidy
       - go list -u -m -json all | go-mod-outdated -update -direct
+
+  mingo:
+    cmds:
+      - mingo -tests -v
