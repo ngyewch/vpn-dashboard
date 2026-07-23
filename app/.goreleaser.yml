@@ -2,7 +2,6 @@ version: 2
 project_name: vpn-dashboard
 before:
   hooks:
-    - go mod download
     - go generate ./...
     - go mod tidy
 builds:
