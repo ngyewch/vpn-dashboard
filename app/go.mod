@@ -4,11 +4,11 @@ go 1.26.0
 
 require (
 	github.com/bronze1man/goStrongswanVici v0.0.0-20231128135937-211cef3b0b20
-	github.com/labstack/echo/v4 v4.16.3
+	github.com/labstack/echo/v4 v4.16.5
 	github.com/ngyewch/go-clibase v1.6.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/urfave/cli/v3 v3.14.0
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 )
 
 require (
